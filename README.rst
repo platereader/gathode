@@ -12,6 +12,13 @@ Density Experiments (CATHODE) uses multiple output files of GATHODE to
 analyse this survival.
 
 
+Documentation
+~~~~~~~~~~~~~
+
+Installation instructions and user documentation can be found at
+`<https://platereader.github.io/>`_.
+
+
 Quick demo
 ~~~~~~~~~~
 
@@ -22,5 +29,3 @@ then run
 
     pip install https://github.com/platereader/gathode/archive/master.zip
     gathode
-
-More information will follow soon.
