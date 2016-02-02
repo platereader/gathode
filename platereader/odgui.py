@@ -40,7 +40,7 @@ from PyQt4 import QtGui
 
 import matplotlib.figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
 from platereader.plate import Plate
 from platereader.odplot import replicateToFig, plotFullOdPlate, odPlateOverviewToAxes, replicateNderivativePlotAsPdf

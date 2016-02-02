@@ -42,7 +42,7 @@ sip.setapi('QString', 1)
 from PyQt4 import Qt
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 
 from platereader.odgui import EmptyModel, ODplateItem, ODplateModel, MyMplCanvas, DeselectableTreeView
 from platereader.odgui import getSaveFileNameDialogWithDefaultSuffix, MyProgressWidget, agpllicense
