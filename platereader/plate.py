@@ -442,6 +442,8 @@ class Plate(object):
 
         :return: str -- sample id (capitalised if it matches one of capitaliseThese)
         """
+        if not sampleId:
+            return sampleId
         for bgid in capitaliseThese:
             if sampleId.upper() == bgid.upper():
                 return bgid.upper()
