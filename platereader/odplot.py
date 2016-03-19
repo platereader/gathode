@@ -775,6 +775,7 @@ def odPlateOverviewToAxes(ax,plate):
         cols=20
         rows=10
     else:
+        plateformat='null'
         cols=int(round(math.sqrt(len(plate.wells))))
         rows=int(math.ceil(len(plate.wells)/float(cols)))
         showPlateLabels=False
