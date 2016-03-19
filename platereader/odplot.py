@@ -369,13 +369,13 @@ def dataToMatplotlibAxes(replicate,ax,title=None,
 
     if replicate.od() is not None and showOd:
         ax.plot(replicate.time,replicate.od(),label="bckgrnd & HD corr.",color=colors_['od'])
+        if showSingle:
+            # show each underlying replicate
+            for stc in replicate.activeChildWells():
+                if stc.od() is not None:
+                    ax.plot(stc.time,stc.od(),label="",color=colors_['singleod'])
         if replicate.odVar() is not None:
             err=numpy.sqrt(replicate.odVar())
-            if showSingle:
-                # show each underlying replicate
-                for stc in replicate.activeChildWells():
-                    if stc.od() is not None:
-                        ax.plot(stc.time,stc.od(),label="",color=colors_['singleod'])
             ax.fill_between(replicate.time, replicate.od()-err, replicate.od()+err,
                             alpha=colors_['oderralpha'],edgecolor=colors_['oderr'],facecolor=colors_['oderr'])
 
