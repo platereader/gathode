@@ -1433,17 +1433,21 @@ class OdReplicateWidgets(object):
             self.selectPlateformat.setExclusive(True)
             btn096=QtGui.QRadioButton('96 wells')
             btn384=QtGui.QRadioButton('384 wells')
+            btn100honeycomb=QtGui.QRadioButton('100 wells honeycomb')
             btn200honeycomb=QtGui.QRadioButton('200 wells honeycomb')
             btn096.setChecked(True)
             self.selectPlateformat.addButton(btn096)
             self.selectPlateformat.addButton(btn384)
+            self.selectPlateformat.addButton(btn100honeycomb)
             self.selectPlateformat.addButton(btn200honeycomb)
             self.selectPlateformat.setId(btn096,0)
             self.selectPlateformat.setId(btn384,1)
-            self.selectPlateformat.setId(btn200honeycomb,2)
+            self.selectPlateformat.setId(btn100honeycomb,2)
+            self.selectPlateformat.setId(btn200honeycomb,3)
             selectLayout=QtGui.QVBoxLayout()
             selectLayout.addWidget(btn096)
             selectLayout.addWidget(btn384)
+            selectLayout.addWidget(btn100honeycomb)
             selectLayout.addWidget(btn200honeycomb)
 
             okButton=QtGui.QPushButton('Ok')
@@ -1784,6 +1788,8 @@ class ODMainWindow(QtGui.QMainWindow):
                 elif dialog.selectPlateformat.checkedId() == 1:
                     numWells=384
                 elif dialog.selectPlateformat.checkedId() == 2:
+                    numWells=100
+                elif dialog.selectPlateformat.checkedId() == 3:
                     numWells=200
                 Plate.writeMetadata(fname,[{} for i in range(numWells)],['sample','condition'],
                                     plateformat=Plate._numWellsToFormatString(numWells))

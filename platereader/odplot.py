@@ -770,6 +770,10 @@ def odPlateOverviewToAxes(ax,plate):
         plateformat='96'
         cols=12
         rows=8
+    elif len(plate.wells) == 100:
+        plateformat='100honeycomb'
+        cols=10
+        rows=10
     elif len(plate.wells) == 200:
         plateformat='200honeycomb'
         cols=20
@@ -801,7 +805,7 @@ def odPlateOverviewToAxes(ax,plate):
     rowheight = maxymax+ysep
     width = colwidth*cols + xoff
     height = rowheight*rows + yoff
-    if plateformat == '200honeycomb':
+    if plateformat == '100honeycomb' or plateformat == '200honeycomb':
         height+=(maxymax+ysep)/2
 
     ax.tick_params(bottom=False,top=False,left=False,right=False,labelbottom=False,labeltop=False,labelleft=False,labelright=False)
@@ -828,7 +832,7 @@ def odPlateOverviewToAxes(ax,plate):
                 })
 
         # border around subplot (NOTE for non-honeycomb wells this is done below)
-        if plateformat == '200honeycomb':
+        if plateformat == '100honeycomb' or plateformat == '200honeycomb':
             ax.axvline(offsets['x1'],ymin=offsets['rely1'],ymax=offsets['rely2'],color='gray')
             ax.axvline(offsets['x2'],ymin=offsets['rely1'],ymax=offsets['rely2'],color='gray')
             ax.axhline(offsets['y1'],xmin=offsets['relx1'],xmax=offsets['relx2'],color='gray')
@@ -836,7 +840,7 @@ def odPlateOverviewToAxes(ax,plate):
 
         tcidx += 1
 
-    if plateformat != '200honeycomb':
+    if plateformat != '100honeycomb' and plateformat != '200honeycomb':
         # border around subplots (NOTE for honeycomb wells this is done above)
         xs = 1 - (colwidth*cols + .5*xsep)/width
         xe = 1 - .5*xsep/width
@@ -847,7 +851,7 @@ def odPlateOverviewToAxes(ax,plate):
         for rowidx in range(0,rows+1):
             ax.axhline(rowidx*(maxymax+ysep) + .5*ysep,xmin=xs,xmax=xe,color='gray')
     if showPlateLabels:
-        if plateformat == '200honeycomb':
+        if plateformat == '100honeycomb' or plateformat == '200honeycomb':
             for rowidx in range(0,rows,2):
                 ax.text(.5*xoff - .5*xsep,((rowidx+1)*rowheight),str(rows-rowidx),verticalalignment='center',horizontalalignment='center')
             for colidx in range(0,cols,2):
@@ -866,7 +870,7 @@ def odPlateOverviewToAxes(ax,plate):
     return rectangles
 
 def _overviewWellOffsets(tc,tcidx,cols,rows,xoff,yoff,xsep,ysep,colwidth,rowheight,width,height,maxxmax,maxymax,plateformat='96'):
-    if plateformat == '200honeycomb':
+    if plateformat == '100honeycomb' or plateformat == '200honeycomb':
         (colidx,rowidx)=divmod(tcidx,rows)
         rowidx = rows-rowidx-1
         extrayoff = 0 if colidx%2 else (maxymax+ysep)/2

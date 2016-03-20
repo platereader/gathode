@@ -1218,7 +1218,8 @@ class Plate(object):
         """
         Return well ids by guessing the plate layout based on number of wells.
 
-        This function will return A1-P24 or A1-H12.
+        This function will return A1-P24 or A1-H12 for 96 or 384 well
+        plates, or just the numbers for 100 or 200 well plates.
 
         :param numberOfWells: number of wells of the plate
         :type numberOfWells: int
@@ -1230,6 +1231,10 @@ class Plate(object):
             labeldivisor=24
         elif numberOfWells == 96:
             labeldivisor=12
+        elif numberOfWells == 100:
+            return [str(i) for i in range(1,101)]
+        elif numberOfWells == 200:
+            return [str(i) for i in range(1,201)]
         else:
             return None
         rowlabels=[chr(x) for x in range(ord('A'), ord('P') + 1)]
@@ -1563,6 +1568,12 @@ class Plate(object):
                 raise RuntimeError('metadata is not of length 384')
             numcols=24
             numrows=16
+        elif plateformat == '100honeycomb':
+            if len(metadata) != 100:
+                raise RuntimeError('metadata is not of length 100')
+            columnMajorOrder=True
+            numcols=10 # number of columns in the layout of the exported metadata
+            numrows=10 # number of rows
         elif plateformat == '200honeycomb':
             if len(metadata) != 200:
                 raise RuntimeError('metadata is not of length 200')
@@ -1573,11 +1584,11 @@ class Plate(object):
         if plateformat == '96' or plateformat == '384':
             rowlabels=[chr(x) for x in range(ord('A'), ord('A') + numrows)]
             collabels=[str(i+1) for i in range(numcols)]
-        elif plateformat == '200honeycomb':
+        elif plateformat == '100honeycomb' or plateformat == '200honeycomb':
             rowlabels=[str(i) for i in range(1,numrows+1)]
             collabels=[str(i+1) for i in range(0,len(metadata),numrows)]
         else:
-            raise RuntimeError('not implemented for format other than 96, 384 or 200 honeycomb')
+            raise RuntimeError('not implemented for format other than 96, 384 or 100/200 honeycomb')
 
         if columnMajorOrder:
             reordered=[]
@@ -1629,6 +1640,10 @@ class Plate(object):
         elif plateformat == '384':
             numcols=24
             numrows=16
+        elif plateformat == '100honeycomb':
+            columnMajorOrder=True
+            numcols=10 # number of columns in the layout of the exported metadata
+            numrows=10 # number of rows
         elif plateformat == '200honeycomb':
             columnMajorOrder=True
             numcols=20 # number of columns in the layout of the exported metadata
@@ -1637,11 +1652,11 @@ class Plate(object):
         if plateformat == '96' or plateformat == '384':
             rowlabels=[chr(x) for x in range(ord('A'), ord('A') + numrows)]
             collabels=[str(i+1) for i in range(numcols)]
-        elif plateformat == '200honeycomb':
+        elif plateformat == '100honeycomb' or plateformat == '200honeycomb':
             rowlabels=[str(i) for i in range(1,numrows+1)]
             collabels=[str(i+1) for i in range(0,numcols*numrows,numrows)]
         else:
-            raise RuntimeError('not implemented for format other than 96, 384 or 200 honeycomb')
+            raise RuntimeError('not implemented for format other than 96, 384 or 100/200 honeycomb')
 
         # initialise the metadata list
         metadata=[{} for i in range(numcols*numrows)]
