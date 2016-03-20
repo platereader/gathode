@@ -43,6 +43,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
 from platereader.plate import Plate
+from platereader.replicate import Replicate
 from platereader.odplot import replicateToFig, plotFullOdPlate, odPlateOverviewToAxes, replicateNderivativePlotAsPdf
 from platereader.statusmessage import StatusMessage, Severity
 from platereader._version import __version__
@@ -126,6 +127,8 @@ class ODplateItem(object):
 
     def setChecked(self,value):
         if self._parentItem is None or self._parentItem._itemData is None:
+            return None
+        if isinstance(self._itemData,Replicate) and self._itemData.rawOd() is None:
             return None
 
         relparidx=self._relativeParentIndex()

@@ -428,7 +428,10 @@ class Replicate(object):
         For internal use only.
         """
         if activeWellIndices is None:
-            activeWellIndices=list(range(0,len(self.childWellIndices())))
+            activeWellIndices = []
+            for idx in range(0,len(self.childWellIndices())):
+                if self.parentPlate._rawOd[self.childWellIndices()[idx]] is not None:
+                    activeWellIndices.append(idx)
         else:
             self._checkActiveWellIndices(activeWellIndices)
 
@@ -444,6 +447,9 @@ class Replicate(object):
         for idx in activeWellIndices:
             if idx < 0 or idx >= len(self.childWellIndices()):
                 raise IndexError("local index "+str(idx)+" out of range for "+self.sampleid+" "+self.condition)
+            if self.parentPlate._rawOd[self.childWellIndices()[idx]] is None:
+                raise RuntimeError("a well without data must not be active (local index "+str(idx)+
+                                   ", well index "+str(self.childWellIndices()[idx])+") "+self.fullId())
             # make sure each index is only mentioned once
             if idx in includedIndices:
                 raise RuntimeError("local index "+str(idx)+" given multiple times: "+self.fullId())

@@ -203,7 +203,10 @@ class Plate(object):
             self.temperature=numpy.array(unpickled['temperature'],dtype=float)
         self._rawOd=[]
         for lst in unpickled['rawOd']:
-            self._rawOd.append(numpy.array(lst,dtype=float))
+            if lst is not None:
+                self._rawOd.append(numpy.array(lst,dtype=float))
+            else:
+                self._rawOd.append(None)
         self.wells=[]
         for tcup in unpickled['wells']:
             self.wells.append(Replicate(_unpickled=tcup,parentPlate=self,_serialiseFormat=unpickled['format']))
@@ -263,7 +266,10 @@ class Plate(object):
             sr['temperature']=self.temperature.tolist()
         sr['rawOd']=[]
         for raw in self._rawOd:
-            sr['rawOd'].append(raw.tolist())
+            if raw is not None:
+                sr['rawOd'].append(raw.tolist())
+            else:
+                sr['rawOd'].append(None)
         sr['wells']=[]
         for tc in self.wells:
             sr['wells'].append(tc._serialise())

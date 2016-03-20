@@ -787,15 +787,17 @@ def odPlateOverviewToAxes(ax,plate):
     # find global x- and y-ranges
     (minxmin,maxxmax,minymin,maxymax)=(+1e32,-1e32,+1e32,-1e32)
     for tc in plate.wells:
-        (xmin,xmax,ymin,ymax)=(tc.time.min(),tc.time.max(),tc.rawOd().min(),tc.rawOd().max())
+        (xmin,xmax)=(tc.time.min(),tc.time.max())
         if xmin < minxmin:
             minxmin=xmin
         if xmax > maxxmax:
             maxxmax=xmax
-        if ymin < minymin:
-            minymin=ymin
-        if ymax > maxymax:
-            maxymax=ymax
+        if tc.rawOd() is not None:
+            (ymin,ymax)=(tc.rawOd().min(),tc.rawOd().max())
+            if ymin < minymin:
+                minymin=ymin
+            if ymax > maxymax:
+                maxymax=ymax
 
     xoff=1.0*maxxmax
     yoff=1.2*maxymax
@@ -813,8 +815,11 @@ def odPlateOverviewToAxes(ax,plate):
 
     colorForSampleCondition=colorsForSampleCondition(plate)
     rectangles=[]
-    tcidx = 0
+    tcidx = -1
     for tc in plate.wells:
+        tcidx += 1
+        if tc.rawOd() is None:
+            continue
         offsets = _overviewWellOffsets(tc,tcidx,cols,rows,xoff,yoff,xsep,ysep,colwidth,rowheight,width,height,maxxmax,maxymax,plateformat)
 
         ax.plot(tc.time + offsets['wellxoff'],
@@ -837,8 +842,6 @@ def odPlateOverviewToAxes(ax,plate):
             ax.axvline(offsets['x2'],ymin=offsets['rely1'],ymax=offsets['rely2'],color='gray')
             ax.axhline(offsets['y1'],xmin=offsets['relx1'],xmax=offsets['relx2'],color='gray')
             ax.axhline(offsets['y2'],xmin=offsets['relx1'],xmax=offsets['relx2'],color='gray')
-
-        tcidx += 1
 
     if plateformat != '100honeycomb' and plateformat != '200honeycomb':
         # border around subplots (NOTE for honeycomb wells this is done above)
