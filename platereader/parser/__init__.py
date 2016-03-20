@@ -57,6 +57,6 @@ def modulenameToModule(modules,replace=None,replacewith='',lower=False):
     return name2module
 
 parser2module = modulenameToModule(
-    list(getModulesOfNamespace(sys.modules[__name__])),
+    list(getModulesOfNamespace(sys.modules[__name__],exclude=['utils'])),
     replace='platereader.parser.',
     lower=True)

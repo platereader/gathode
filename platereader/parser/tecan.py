@@ -32,6 +32,7 @@ import os.path
 import re
 import numpy
 import platereader
+import platereader.parser.utils
 from platereader.csvunicode import CsvFileUnicodeReader
 
 def isPlateFormat(filename):
@@ -74,7 +75,7 @@ def _isTecanFormatHelper(filename,encoding="utf-8"):
             return 50.-subfromscore
     return 0.
 
-def parse(odcsvfilename,seperator='_'):
+def parse(odcsvfilename,separator='_'):
     """
     Read a TECAN file.
 
@@ -83,25 +84,18 @@ def parse(odcsvfilename,seperator='_'):
     :return: numpy.array(float), list( numpy.array(float) ), list(str), str, numpy.array(float), list(str)
      -- time (in seconds), optical density readouts, sample ids, plate id, temperature, wellids
 
-    :param seperator: split well ids on this seperator to distinguish between sample id and condition
-    :type seperator: string
+    :param separator: split well ids on this separator to distinguish between sample id and condition
+    :type separator: string
     """
     encodings=["utf-8", "utf-16", "iso-8859-1"]
     for encoding in encodings:
         try:
-            return _parseTecanCsvExportHelper(odcsvfilename,seperator,encoding=encoding)
+            return _parseTecanCsvExportHelper(odcsvfilename,separator,encoding=encoding)
         except (UnicodeError, UnicodeDecodeError) as e:
             pass
     raise RuntimeError('Error parsing csv file, tried the encodings '+' '.join(encodings))
 
-def _handleDataRow(rawOdList,row):
-    """Helper function for _parseTecanCsvExportHelper"""
-    colit=rawOdList.__iter__()
-    for val in row:
-        column=next(colit)
-        column.append(val)      
-
-def _parseTecanCsvExportHelper(odcsvfilename,seperator='_',encoding="utf-8"):
+def _parseTecanCsvExportHelper(odcsvfilename,separator='_',encoding="utf-8"):
     """Helper function for _parseTecanCsvExport"""
 
     plateId=os.path.basename(odcsvfilename)
@@ -131,16 +125,16 @@ def _parseTecanCsvExportHelper(odcsvfilename,seperator='_',encoding="utf-8"):
                 raise RuntimeError('Error parsing csv file, does not seem to correspond to 96 or 384 well plate format')
 
             # handle first row, as it contains data
-            _handleDataRow(rawOdList,sampleIdsNCondition)
+            platereader.parser.utils.appendElementsToListOfLists(rawOdList,sampleIdsNCondition)
 
             # assign numbers to labels
             sampleIdsNCondition=["{:0>3d}".format(i) for i in range(1-nonSampleIndices,len(sampleIdsNCondition)+1-nonSampleIndices)]
             # make sure labels end up as ids, not as condition
-            seperator=None
+            separator=None
 
         # read data
         for row in odreader:
-            _handleDataRow(rawOdList,row)
+            platereader.parser.utils.appendElementsToListOfLists(rawOdList,row)
 
     # NOTE remove last item because it is empty
     sampleIdsNCondition.pop()
@@ -176,15 +170,6 @@ def _parseTecanCsvExportHelper(odcsvfilename,seperator='_',encoding="utf-8"):
         rawOd.append(numpy.array(l,dtype=float))
 
     # 
-    sampleIds=[]
-    conditions=[]
-    for idCondition in sampleIdsNCondition:
-        if seperator is not None:
-            (sampleid,sep,condition)=idCondition.rpartition(seperator)
-        else:
-            sampleid=idCondition
-            condition=''
-        sampleIds.append(sampleid)
-        conditions.append(condition)
+    sampleIds, conditions = platereader.parser.utils.splitSampleCondition(sampleIdsNCondition,separator)
 
     return time, rawOd, sampleIds, conditions, plateId, temperature, platereader.plate.Plate.guessWellIds(len(rawOd))

@@ -2,7 +2,7 @@
 This module implements a parser for files exported by the Bioscreen C platereader, used by GATHODE.
 
 Growth Analysis Tool for High-throughput Optical Density Experiments
-(GATHODE) Plate class.
+(GATHODE) Bioscreen C platereader format parser.
 """
 
 # GATHODE  Growth Analysis Tool
@@ -29,6 +29,7 @@ import os.path
 import re
 import numpy
 import platereader
+import platereader.parser.utils
 from platereader.csvunicode import CsvFileUnicodeReader
 
 def isPlateFormat(filename):
@@ -57,9 +58,6 @@ def parse(filename):
 
     :return: numpy.array(float), list( numpy.array(float) ), list(str), str, numpy.array(float)
      -- time (in seconds), optical density readouts, sample ids, plate id, temperature
-
-    :param seperator: split well ids on this seperator to distinguish between sample id and condition
-    :type seperator: string
     """
     with CsvFileUnicodeReader(filename, delimiter='\t', quotechar='"') as odreader:
         # first line should contain 'Bioscreen'
@@ -88,15 +86,12 @@ def parse(filename):
         time=[]
         for row in odreader:
             # divide by 10because these are TenthSec.
-            colit=rawOdList.__iter__()
             t=row.pop(0)
             if not len(row):
                 # this seems to be the last row that only contains one empty element (already 'pop'ped into t)
                 continue
             time.append(timemult*float(t))
-            for val in row:
-                column=next(colit)
-                column.append(val)
+            platereader.parser.utils.appendElementsToListOfLists(rawOdList,row)
 
     # the time as numpy array
     time=numpy.array(time,dtype=float)
