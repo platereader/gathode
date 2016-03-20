@@ -30,6 +30,13 @@ import math
 import numpy
 import scipy.stats
 from scipy.interpolate import UnivariateSpline
+try:
+    w = scipy.optimize.OptimizeWarning()
+    from scipy.optimize import OptimizeWarning as OptimizeWarning
+except AttributeError:
+    # this is an old scipy without OptimizeWarning, create a dummy class
+    class OptimizeWarning(UserWarning):
+        pass
 
 from platereader.numpytools import maskedArrayToMeanVar, notNanAndGreaterEqual, notNanAndLess
 from platereader.statusmessage import StatusMessage, Severity
@@ -1154,28 +1161,35 @@ class Replicate(object):
                 # function to fit: OD_fit(t[i+j]) = OD_i * exp(mu*(t[i+j] - t[i]))
                 # i.e. OD_i and mu are fit parameters, and a good guess for OD_i is OD_meas(t[i])
                 f = lambda tminti, *p: p[0] * numpy.exp(p[1]*(tminti))
-                try:
-                    popt, pcov = scipy.optimize.curve_fit(f,
-                                                          xdata=self.time[i:i+slidingWindowSize]-self.time[i],
-                                                          ydata=thisod[i:i+slidingWindowSize],
-                                                          p0=[thisod[i],1])
-                    mu[i]=popt[1]
-                    od0[i]=popt[0]
-                except RuntimeError as e:
-                    mu[i]=numpy.nan
-                    od0[i]=numpy.nan
+                with warnings.catch_warnings(record=True) as w:
+                    # Turn all warnings into errors.
+                    warnings.simplefilter("error")
+                    try:
+                        popt, pcov = scipy.optimize.curve_fit(f,
+                                                              xdata=self.time[i:i+slidingWindowSize]-self.time[i],
+                                                              ydata=thisod[i:i+slidingWindowSize],
+                                                              p0=[thisod[i],1])
+                        mu[i]=popt[1]
+                        od0[i]=popt[0]
+                    except (RuntimeError, OptimizeWarning) as e:
+                        mu[i]=numpy.nan
+                        od0[i]=numpy.nan
             else:
                 # function to fit: OD_fit(t[i+j]) = OD[t[i]] * exp(mu*(t[i+j] - t[i]))
                 # i.e. mu is the fit parameter
                 f = lambda tminti, *p: thisod[i] * numpy.exp(p[0]*(tminti))
-                try:
-                    popt, pcov = scipy.optimize.curve_fit(f,
-                                                          xdata=self.time[i:i+slidingWindowSize]-self.time[i],
-                                                          ydata=thisod[i:i+slidingWindowSize],
-                                                          p0=[1])
-                    mu[i]=popt[0]
-                except RuntimeError as e:
-                    mu[i]=numpy.nan
+
+                with warnings.catch_warnings(record=True) as w:
+                    # Turn all warnings into errors.
+                    warnings.simplefilter("error")
+                    try:
+                        popt, pcov = scipy.optimize.curve_fit(f,
+                                                              xdata=self.time[i:i+slidingWindowSize]-self.time[i],
+                                                              ydata=thisod[i:i+slidingWindowSize],
+                                                              p0=[1])
+                        mu[i]=popt[0]
+                    except (RuntimeError, OptimizeWarning) as e:
+                        mu[i]=numpy.nan
 
         return mu, None, od0, None
 
@@ -1309,7 +1323,7 @@ class Replicate(object):
         # ==> log(od0)=log(od0_t0)-mu*t0
         # ==> od0 = od0_t0 * exp(-mu*t0)
         if method == 'expfit':
-            od0max=od0[idcs][maxidx] * math.exp(-mumax*self.time[idcs][maxidx])
+            od0max=od0[idcs][maxidx] * math.exp(-mumax*self.time[:-self.slidingWindowSize()][idcs][maxidx])
         else:
             od0max=od0[idcs][maxidx] * math.exp(-mumax*t[idcs][maxidx])
 
@@ -1609,7 +1623,6 @@ class Replicate(object):
                                                                              severity=Severity.failed)
 
         if self.isReplicateGroup():
-            warnings.simplefilter('error', UserWarning)
             # here we average over the underlying wells
             growthyield=numpy.zeros([len(self.activeChildWellIndices())])
             tgrowthyield=numpy.zeros([len(self.activeChildWellIndices())])
@@ -1677,7 +1690,7 @@ class Replicate(object):
         # pick the largest value of those that are valid
         yieldidx=numpy.argmax(mean[validIndices])
         growthyield=mean[validIndices][yieldidx]
-        tgrowthyield=self.time[tmb+timemaxIdx:][validIndices][yieldidx]
+        tgrowthyield=self.time[tmb+timemaxIdx:-tmt][validIndices][yieldidx]
 
         if growthyield<0:
             return None, None, None, None, StatusMessage(key='growthyield',shortmsg='growthyield:negativeYield',
