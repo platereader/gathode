@@ -27,14 +27,19 @@ Growth Analysis Tool for High-throughput Optical Density Experiments
 
 __all__ = ['tecan','bioscreen']
 
+import sys
 import inspect
 
-def getModulesOfNamespace(namespace,handledModules=[],depth=0,orignamespace=None):
+from . import *
+
+def getModulesOfNamespace(namespace,handledModules=[],depth=0,orignamespace=None,exclude=None):
     if orignamespace is None:
         orignamespace = namespace.__name__
+    if exclude is None:
+        exclude = []
     modules=set()
     for name, obj in inspect.getmembers(namespace):
-        if inspect.ismodule(obj) and str(obj) not in modules and obj.__name__.startswith(str(orignamespace)):
+        if inspect.ismodule(obj) and str(obj) not in modules and name not in exclude and obj.__name__.startswith(str(orignamespace)):
             modules.update(set([obj]))
             newclasses = getModulesOfNamespace(obj,handledModules,depth=depth+1,orignamespace=orignamespace)
             modules.update(newclasses)
@@ -50,3 +55,8 @@ def modulenameToModule(modules,replace=None,replacewith='',lower=False):
             name = name.replace(replace,replacewith)
         name2module[name]=md
     return name2module
+
+parser2module = modulenameToModule(
+    list(getModulesOfNamespace(sys.modules[__name__])),
+    replace='platereader.parser.',
+    lower=True)

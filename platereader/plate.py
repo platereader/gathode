@@ -35,17 +35,12 @@ import platereader
 from platereader.replicate import Replicate
 from platereader.statusmessage import StatusMessage, Severity
 from platereader.csvunicode import CsvFileUnicodeWriter, CsvFileUnicodeReader
-from platereader.parser import tecan, bioscreen
+import platereader.parser
 
 class Plate(object):
     """
     Class containing the wells and holding plate-wide parameters.
     """
-
-    _parser2module = platereader.parser.modulenameToModule(
-        list(platereader.parser.getModulesOfNamespace(platereader.parser)),
-        replace='platereader.parser.',
-        lower=True)
 
     _isNotPlateParameter={
         'allowMaxGrowthrateAtLowerCutoff': True,
@@ -114,8 +109,8 @@ class Plate(object):
                     fileformat='gat'
                 else:
                     scorefileformat=[]
-                    for fileformat in Plate._parser2module:
-                        score=Plate._parser2module[fileformat].isPlateFormat(filename)
+                    for fileformat in platereader.parser.parser2module:
+                        score=platereader.parser.parser2module[fileformat].isPlateFormat(filename)
                         if score > 0.:
                             scorefileformat.append({'score': score, 'fileformat': fileformat})
                     scorefileformat = sorted(scorefileformat, key=lambda k: k['score'],reverse=True)
@@ -124,8 +119,8 @@ class Plate(object):
                     fileformat=scorefileformat[0]['fileformat']
             if fileformat == 'gat':
                 self._load(filename)
-            elif fileformat in Plate._parser2module:
-                time, rawOd, sampleIds, conditions, plateId, temperature, wellids=Plate._parser2module[fileformat].parse(filename)
+            elif fileformat in platereader.parser.parser2module:
+                time, rawOd, sampleIds, conditions, plateId, temperature, wellids=platereader.parser.parser2module[fileformat].parse(filename)
                 self._initFromArrays(time,rawOd,sampleIds,conditions,plateId=plateId,temperature=temperature,wellids=wellids)
             else:
                 raise Plate.UnknownFileFormat(filename,serFormat=fileformat)
