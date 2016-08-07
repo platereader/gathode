@@ -456,7 +456,7 @@ class Plate(object):
 
         For internal use only.
 
-        :param time: array of timepoints when optical density was measured
+        :param time: array of timepoints when optical density was measured (in seconds)
         :type time: numpy.array(float)
 
         :param rawOd: list of optical density arrays

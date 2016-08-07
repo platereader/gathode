@@ -52,3 +52,24 @@ def splitSampleCondition(sampleCondition,separator='_'):
         conditions.append(condition)
 
     return sampleIds, conditions
+
+def replaceIntegerSampleIdsWithSortableStrings(sampleIds,formatstr='{:03d}'):
+    """
+    Replace numbers with a formatted string representation.
+
+    GATHODE sorts samples by their name. If sample names are just
+    numbers, this will lead to non-intuitive sorting. Here we replace
+    the numbers 1, 2, 3, ... with the strings 001, 002, 003 which sort
+    as expected.
+    """
+    for val in sampleIds:
+        try:
+            int(val)
+        except ValueError:
+            # these are not all integers, return unchanged array
+            return sampleIds
+
+    newSampleIds = []
+    for val in sampleIds:
+        newSampleIds.append(formatstr.format(int(val)))
+    return newSampleIds

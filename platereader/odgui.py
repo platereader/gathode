@@ -1690,7 +1690,7 @@ class ODMainWindow(QtGui.QMainWindow):
 
     def openODfile(self):
         self.closeODfile()
-        fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '', 'Growth analysis data (*.asc *.txt *.gat)')
+        fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '', 'Growth analysis data (*.asc *.txt *.csv *.gat)')
         if len(fname) == 0:
             return
         condition=""

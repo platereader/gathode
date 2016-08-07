@@ -25,7 +25,7 @@ Growth Analysis Tool for High-throughput Optical Density Experiments
 # You should have received a copy of the GNU Affero General Public License
 # along with GATHODE.  If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = ['tecan','bioscreen']
+__all__ = ['tecan','bioscreen','basiccsv01']
 
 import sys
 import inspect
