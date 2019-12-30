@@ -278,8 +278,6 @@ class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         self.fig = matplotlib.figure.Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
-        # We want the axes cleared every time plot() is called
-        self.axes.hold(False)
 
         FigureCanvas.__init__(self, self.fig)
         FigureCanvas.setSizePolicy(self,
@@ -956,7 +954,7 @@ class OdReplicateWidgets(object):
             if isinstance(self.selectedReplicate, Plate):
                 # this is the whole plate, so show an overview of all wells
                 self.overviewmplcnvs.fig.clear()
-                ax=self.overviewmplcnvs.fig.add_subplot(1,1,1,axisbg='#eeeeee')
+                ax=self.overviewmplcnvs.fig.add_subplot(1,1,1,facecolor='#eeeeee')
                 self._overviewWellRectangles=odPlateOverviewToAxes(ax,self.odplate)
                 if self.odplate._loadStatus is not None:
                     status=self.odplate._loadStatus
